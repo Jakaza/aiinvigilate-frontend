@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Clock, List, Plus, Save, Trash2, Edit2, Check, X, HelpCircle } from 'lucide-react';
@@ -17,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import AdminNavbar from '@/components/layout/AdminNavbar';
 
 // Basic test schema
 const testSchema = z.object({
@@ -279,20 +279,15 @@ const LecturerDashboard = () => {
   };
   
   return (
-    <div className="min-h-screen bg-eduPrimary-light py-16 px-4 md:px-8">
-      <div className="container mx-auto max-w-5xl pt-12">
+    <div className="min-h-screen bg-eduPrimary-light">
+      <AdminNavbar userRole="lecturer" userName="Lecturer User" />
+      
+      <div className="container mx-auto max-w-5xl py-8 px-4 md:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-eduText-dark">Lecturer Dashboard</h1>
-            <p className="text-eduText-light mt-2">Create and manage tests</p>
+            <h1 className="text-3xl font-bold text-eduText-dark">Create Test</h1>
+            <p className="text-eduText-light mt-2">Create and configure a new test</p>
           </div>
-          <Button 
-            variant="primary" 
-            to="/"
-            className="mt-4 md:mt-0"
-          >
-            Back to Home
-          </Button>
         </div>
         
         <GlassCard className="mb-8 p-6">

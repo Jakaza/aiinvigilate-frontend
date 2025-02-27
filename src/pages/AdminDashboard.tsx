@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, X, Edit, Search, Users, Filter, ChevronDown } from 'lucide-react';
+import { Check, X, Edit, Search, Users, Filter } from 'lucide-react';
 import GlassCard from '@/components/ui-custom/GlassCard';
 import Button from '@/components/ui-custom/Button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import AdminNavbar from '@/components/layout/AdminNavbar';
 
 // Mock data to simulate users
 const mockUsers = [
@@ -134,27 +135,22 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-eduPrimary-light py-16 px-4 md:px-8">
-      <div className="container mx-auto max-w-7xl pt-12">
+    <div className="min-h-screen bg-eduPrimary-light">
+      <AdminNavbar userRole="admin" userName="Admin User" />
+      
+      <div className="container mx-auto max-w-7xl py-8 px-4 md:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-eduText-dark">Admin Dashboard</h1>
-            <p className="text-eduText-light mt-2">Manage users and system settings</p>
+            <h1 className="text-3xl font-bold text-eduText-dark">User Management</h1>
+            <p className="text-eduText-light mt-2">View and manage system users</p>
           </div>
-          <Button 
-            variant="primary" 
-            to="/"
-            className="mt-4 md:mt-0"
-          >
-            Back to Home
-          </Button>
         </div>
         
         <GlassCard className="mb-8 p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <h2 className="text-xl font-semibold flex items-center">
               <Users className="mr-2 h-5 w-5 text-eduAccent" />
-              User Management
+              All Users
             </h2>
             
             <div className="w-full md:w-auto mt-4 md:mt-0 flex flex-col md:flex-row items-stretch md:items-center gap-4">

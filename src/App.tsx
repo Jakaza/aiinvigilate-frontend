@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import LecturerDashboard from "./pages/LecturerDashboard";
+import LecturerReports from "./pages/LecturerReports";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/lecturer" element={<LecturerDashboard />} />
+          <Route path="/lecturer/reports" element={<LecturerReports />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
