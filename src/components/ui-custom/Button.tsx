@@ -1,30 +1,51 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { Link, LinkProps } from 'react-router-dom';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+// Create two separate interfaces for the different rendering modes
+type ButtonAsButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost' | 'link';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  to?: string;
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
-}
+  to?: undefined; // Explicitly make to undefined for button mode
+};
 
-const Button = ({
-  children,
-  variant = 'primary',
-  size = 'md',
-  className,
-  to,
-  loading = false,
-  icon,
-  iconPosition = 'left',
-  ...props
-}: ButtonProps) => {
+type ButtonAsLinkProps = Omit<LinkProps, 'to'> & {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'link';
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  loading?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
+  to: string; // Make to required for link mode
+};
+
+// Create a union type for the two rendering modes
+type ButtonProps = ButtonAsButtonProps | ButtonAsLinkProps;
+
+// Helper function to determine if the button is a link
+const isLink = (props: ButtonProps): props is ButtonAsLinkProps => {
+  return props.to !== undefined;
+};
+
+const Button = (props: ButtonProps) => {
+  const { 
+    children, 
+    variant = 'primary', 
+    size = 'md', 
+    className,
+    loading = false,
+    icon,
+    iconPosition = 'left',
+    ...rest
+  } = props;
+
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all focus-ring';
 
   const variantStyles = {
@@ -42,18 +63,13 @@ const Button = ({
 
   const loadingClassName = loading ? 'opacity-80 cursor-not-allowed' : '';
   
-  const Element = to ? Link : 'button';
-  const elementProps = to 
-    ? { to, className: cn(baseStyles, variantStyles[variant], sizeStyles[size], loadingClassName, className) } 
-    : { className: cn(baseStyles, variantStyles[variant], sizeStyles[size], loadingClassName, className), ...props };
-
   // Skip size styling for link variant
-  const combinedClassName = variant === 'link' 
+  const buttonClassName = variant === 'link' 
     ? cn(baseStyles, variantStyles[variant], loadingClassName, className)
-    : elementProps.className;
+    : cn(baseStyles, variantStyles[variant], sizeStyles[size], loadingClassName, className);
 
-  return (
-    <Element {...elementProps} className={combinedClassName}>
+  const content = (
+    <>
       {loading ? (
         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -66,7 +82,22 @@ const Button = ({
       {!loading && icon && iconPosition === 'right' ? (
         <span className="ml-2">{icon}</span>
       ) : null}
-    </Element>
+    </>
+  );
+
+  // Render as Link or button based on the presence of 'to' prop
+  if (isLink(props)) {
+    return (
+      <Link className={buttonClassName} to={props.to} {...rest}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button className={buttonClassName} {...rest}>
+      {content}
+    </button>
   );
 };
 
