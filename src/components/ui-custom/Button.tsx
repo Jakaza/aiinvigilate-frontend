@@ -88,14 +88,14 @@ const Button = (props: ButtonProps) => {
   // Render as Link or button based on the presence of 'to' prop
   if (isLink(props)) {
     return (
-      <Link className={buttonClassName} to={props.to} {...rest}>
+      <Link className={buttonClassName} to={props.to} {...rest as Omit<LinkProps, 'to'>}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button className={buttonClassName} {...rest}>
+    <button className={buttonClassName} {...rest as React.ButtonHTMLAttributes<HTMLButtonElement>}>
       {content}
     </button>
   );

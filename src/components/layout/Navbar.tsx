@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Button from '../ui-custom/Button';
 import GlassCard from '../ui-custom/GlassCard';
-import { Menu, X, BookOpen } from 'lucide-react';
+import { Menu, X, BookOpen, User } from 'lucide-react';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -71,9 +71,14 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
-          <Button variant="primary" size="sm">
-            Start Exam
-          </Button>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" to="/login" icon={<User className="w-4 h-4" />}>
+              Login
+            </Button>
+            <Button variant="primary" size="sm" to="/register">
+              Register
+            </Button>
+          </div>
         </nav>
 
         {/* Mobile menu button */}
@@ -110,8 +115,14 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
-              <Button className="w-full mt-2" variant="primary">
-                Start Exam
+              <Link
+                to="/login"
+                className="px-3 py-2 rounded-md text-base font-medium text-eduText hover:bg-eduPrimary hover:text-eduAccent"
+              >
+                Login
+              </Link>
+              <Button className="w-full mt-2" variant="primary" to="/register">
+                Register
               </Button>
             </nav>
           </GlassCard>
