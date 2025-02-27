@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BookOpen, Users, FileText, ChevronDown, Menu, X, LogOut, Home } from 'lucide-react';
+import { BookOpen, Users, FileText, ChevronDown, Menu, X, LogOut, Home, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type NavLinkProps = {
   to: string;
@@ -36,16 +37,27 @@ const NavLink = ({ to, icon, label, isActive }: NavLinkProps) => (
 );
 
 type AdminNavbarProps = {
-  userRole: 'admin' | 'lecturer';
+  userRole: 'admin' | 'lecturer' | 'student';
   userName?: string;
+  userImage?: string;
 };
 
-const AdminNavbar = ({ userRole, userName = 'User' }: AdminNavbarProps) => {
+const AdminNavbar = ({ userRole, userName = 'User', userImage }: AdminNavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+  
+  // Get initials for avatar fallback
+  const getInitials = () => {
+    if (!userName) return "U";
+    const nameParts = userName.split(" ");
+    if (nameParts.length >= 2) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`;
+    }
+    return userName.substring(0, 2);
   };
   
   // Define navigation links based on user role
@@ -78,6 +90,18 @@ const AdminNavbar = ({ userRole, userName = 'User' }: AdminNavbarProps) => {
         icon: <FileText className="h-4 w-4" />,
         label: "Test Reports"
       }
+    ] : []),
+    ...(userRole === 'student' ? [
+      {
+        to: "/student",
+        icon: <User className="h-4 w-4" />,
+        label: "Dashboard"
+      },
+      {
+        to: "/exam",
+        icon: <BookOpen className="h-4 w-4" />,
+        label: "Tests"
+      }
     ] : [])
   ];
 
@@ -108,7 +132,13 @@ const AdminNavbar = ({ userRole, userName = 'User' }: AdminNavbarProps) => {
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-1">
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={userImage} alt={userName} />
+                    <AvatarFallback className="bg-eduAccent-light text-eduAccent-dark">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
                   <span className="hidden sm:inline-block">{userName}</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>

@@ -15,17 +15,90 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AdminNavbar from '@/components/layout/AdminNavbar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // Mock data to simulate users
 const mockUsers = [
-  { id: 1, name: 'John Doe', surname: 'Doe', email: 'john.doe@example.com', role: 'student', status: 'active', idNumber: 'STU001' },
-  { id: 2, name: 'Jane Smith', surname: 'Smith', email: 'jane.smith@example.com', role: 'student', status: 'active', idNumber: 'STU002' },
-  { id: 3, name: 'Robert Johnson', surname: 'Johnson', email: 'robert.j@example.com', role: 'lecturer', status: 'active', idNumber: 'LEC001' },
-  { id: 4, name: 'Sarah Williams', surname: 'Williams', email: 'sarah.w@example.com', role: 'lecturer', status: 'inactive', idNumber: 'LEC002' },
-  { id: 5, name: 'Michael Brown', surname: 'Brown', email: 'michael.b@example.com', role: 'student', status: 'inactive', idNumber: 'STU003' },
-  { id: 6, name: 'Lisa Davis', surname: 'Davis', email: 'lisa.d@example.com', role: 'student', status: 'active', idNumber: 'STU004' },
-  { id: 7, name: 'James Wilson', surname: 'Wilson', email: 'james.w@example.com', role: 'lecturer', status: 'active', idNumber: 'LEC003' },
-  { id: 8, name: 'Emily Taylor', surname: 'Taylor', email: 'emily.t@example.com', role: 'student', status: 'inactive', idNumber: 'STU005' },
+  { 
+    id: 1, 
+    name: 'John', 
+    surname: 'Doe', 
+    email: 'john.doe@example.com', 
+    role: 'student', 
+    status: 'active', 
+    idNumber: 'STU001',
+    profileImage: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=150&auto=format&fit=crop'
+  },
+  { 
+    id: 2, 
+    name: 'Jane', 
+    surname: 'Smith', 
+    email: 'jane.smith@example.com', 
+    role: 'student', 
+    status: 'active', 
+    idNumber: 'STU002',
+    profileImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop'
+  },
+  { 
+    id: 3, 
+    name: 'Robert', 
+    surname: 'Johnson', 
+    email: 'robert.j@example.com', 
+    role: 'lecturer', 
+    status: 'active', 
+    idNumber: 'LEC001',
+    profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop'
+  },
+  { 
+    id: 4, 
+    name: 'Sarah', 
+    surname: 'Williams', 
+    email: 'sarah.w@example.com', 
+    role: 'lecturer', 
+    status: 'inactive', 
+    idNumber: 'LEC002',
+    profileImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop'
+  },
+  { 
+    id: 5, 
+    name: 'Michael', 
+    surname: 'Brown', 
+    email: 'michael.b@example.com', 
+    role: 'student', 
+    status: 'inactive', 
+    idNumber: 'STU003',
+    profileImage: null
+  },
+  { 
+    id: 6, 
+    name: 'Lisa', 
+    surname: 'Davis', 
+    email: 'lisa.d@example.com', 
+    role: 'student', 
+    status: 'active', 
+    idNumber: 'STU004',
+    profileImage: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop'
+  },
+  { 
+    id: 7, 
+    name: 'James', 
+    surname: 'Wilson', 
+    email: 'james.w@example.com', 
+    role: 'lecturer', 
+    status: 'active', 
+    idNumber: 'LEC003',
+    profileImage: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=150&auto=format&fit=crop'
+  },
+  { 
+    id: 8, 
+    name: 'Emily', 
+    surname: 'Taylor', 
+    email: 'emily.t@example.com', 
+    role: 'student', 
+    status: 'inactive', 
+    idNumber: 'STU005',
+    profileImage: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=150&auto=format&fit=crop'
+  },
 ];
 
 // Edit user form schema
@@ -36,6 +109,7 @@ const editUserSchema = z.object({
   role: z.enum(["admin", "lecturer", "student"], { required_error: "Please select a role" }),
   status: z.enum(["active", "inactive"], { required_error: "Please select a status" }),
   idNumber: z.string().min(2, { message: "ID Number is required" }),
+  profileImage: z.string().nullable(),
 });
 
 type EditUserFormValues = z.infer<typeof editUserSchema>;
@@ -49,6 +123,7 @@ const AdminDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const adminProfileImage = 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=150&auto=format&fit=crop';
 
   const form = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
@@ -59,6 +134,7 @@ const AdminDashboard = () => {
       role: 'student',
       status: 'active',
       idNumber: '',
+      profileImage: null,
     },
   });
 
@@ -99,6 +175,7 @@ const AdminDashboard = () => {
       role: user.role as "admin" | "lecturer" | "student",
       status: user.status as "active" | "inactive",
       idNumber: user.idNumber,
+      profileImage: user.profileImage,
     });
     setIsEditModalOpen(true);
   };
@@ -136,7 +213,11 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-eduPrimary-light">
-      <AdminNavbar userRole="admin" userName="Admin User" />
+      <AdminNavbar 
+        userRole="admin" 
+        userName="Admin User" 
+        userImage={adminProfileImage}
+      />
       
       <div className="container mx-auto max-w-7xl py-8 px-4 md:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -203,8 +284,8 @@ const AdminDashboard = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-eduPrimary text-eduText-dark">
+                  <th className="py-3 px-4 text-left font-medium">User</th>
                   <th className="py-3 px-4 text-left font-medium">ID</th>
-                  <th className="py-3 px-4 text-left font-medium">Name</th>
                   <th className="py-3 px-4 text-left font-medium">Email</th>
                   <th className="py-3 px-4 text-left font-medium">Role</th>
                   <th className="py-3 px-4 text-left font-medium">Status</th>
@@ -215,8 +296,18 @@ const AdminDashboard = () => {
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
                     <tr key={user.id} className="border-b border-eduPrimary-dark hover:bg-eduPrimary">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center">
+                          <Avatar className="h-8 w-8 mr-2">
+                            <AvatarImage src={user.profileImage || undefined} alt={`${user.name} ${user.surname}`} />
+                            <AvatarFallback className="bg-eduAccent-light text-eduAccent-dark">
+                              {user.name[0]}{user.surname[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{user.name} {user.surname}</span>
+                        </div>
+                      </td>
                       <td className="py-3 px-4">{user.idNumber}</td>
-                      <td className="py-3 px-4">{user.name} {user.surname}</td>
                       <td className="py-3 px-4">{user.email}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -288,6 +379,37 @@ const AdminDashboard = () => {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmitEdit)} className="space-y-4 pt-4">
+              <div className="flex justify-center mb-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage 
+                    src={form.watch('profileImage') || undefined} 
+                    alt={`${form.watch('name')} ${form.watch('surname')}`} 
+                  />
+                  <AvatarFallback className="bg-eduAccent-light text-eduAccent-dark text-lg">
+                    {form.watch('name')?.[0]}{form.watch('surname')?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="profileImage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Profile Image URL</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter profile image URL" 
+                        {...field} 
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
