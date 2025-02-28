@@ -12,6 +12,7 @@ type ButtonAsButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  disabled?: boolean;
   to?: undefined; // Explicitly make to undefined for button mode
 };
 
@@ -23,6 +24,7 @@ type ButtonAsLinkProps = Omit<LinkProps, 'to'> & {
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  disabled?: boolean;
   to: string; // Make to required for link mode
 };
 
@@ -43,6 +45,7 @@ const Button = (props: ButtonProps) => {
     loading = false,
     icon,
     iconPosition = 'left',
+    disabled = false,
     ...rest
   } = props;
 
@@ -62,11 +65,12 @@ const Button = (props: ButtonProps) => {
   };
 
   const loadingClassName = loading ? 'opacity-80 cursor-not-allowed' : '';
+  const disabledClassName = disabled ? 'opacity-60 cursor-not-allowed pointer-events-none' : '';
   
   // Skip size styling for link variant
   const buttonClassName = variant === 'link' 
-    ? cn(baseStyles, variantStyles[variant], loadingClassName, className)
-    : cn(baseStyles, variantStyles[variant], sizeStyles[size], loadingClassName, className);
+    ? cn(baseStyles, variantStyles[variant], loadingClassName, disabledClassName, className)
+    : cn(baseStyles, variantStyles[variant], sizeStyles[size], loadingClassName, disabledClassName, className);
 
   const content = (
     <>
@@ -88,14 +92,23 @@ const Button = (props: ButtonProps) => {
   // Render as Link or button based on the presence of 'to' prop
   if (isLink(props)) {
     return (
-      <Link className={buttonClassName} to={props.to} {...rest as Omit<LinkProps, 'to'>}>
+      <Link 
+        className={buttonClassName} 
+        to={props.to} 
+        {...rest as Omit<LinkProps, 'to'>}
+        onClick={disabled ? (e) => e.preventDefault() : rest.onClick}
+      >
         {content}
       </Link>
     );
   }
 
   return (
-    <button className={buttonClassName} {...rest as React.ButtonHTMLAttributes<HTMLButtonElement>}>
+    <button 
+      className={buttonClassName} 
+      disabled={disabled || loading} 
+      {...rest as React.ButtonHTMLAttributes<HTMLButtonElement>}
+    >
       {content}
     </button>
   );

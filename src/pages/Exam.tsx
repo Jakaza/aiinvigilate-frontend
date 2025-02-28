@@ -7,6 +7,8 @@ import QuestionCard from '../components/exam/QuestionCard';
 import GlassCard from '../components/ui-custom/GlassCard';
 import Button from '../components/ui-custom/Button';
 import { toast } from '@/components/ui/use-toast';
+import PhotoVerification from '@/components/exam/PhotoVerification';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 // Mock data for the exam
 const mockQuestions = [
@@ -69,12 +71,31 @@ const Exam = () => {
   const [examStarted, setExamStarted] = useState(false);
   const [examComplete, setExamComplete] = useState(false);
   const [score, setScore] = useState(0);
+  
+  // Photo verification states
+  const [verificationComplete, setVerificationComplete] = useState(false);
+  const [verificationImages, setVerificationImages] = useState<{
+    selfie: string | null;
+    environment: string | null;
+    verificationTimes: string[];
+  }>({
+    selfie: null,
+    environment: null,
+    verificationTimes: []
+  });
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [nextVerificationTime, setNextVerificationTime] = useState(0);
 
-  // Calculate remaining time
+  // Calculate remaining time and handle periodic verification
   useEffect(() => {
-    if (examStarted && !examComplete) {
+    if (examStarted && !examComplete && verificationComplete) {
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => {
+          // Check if it's time for verification
+          if (nextVerificationTime > 0 && prevTime <= nextVerificationTime) {
+            triggerVerification();
+          }
+          
           if (prevTime <= 1) {
             clearInterval(timer);
             handleExamComplete();
@@ -86,7 +107,16 @@ const Exam = () => {
       
       return () => clearInterval(timer);
     }
-  }, [examStarted, examComplete]);
+  }, [examStarted, examComplete, verificationComplete, nextVerificationTime]);
+
+  // Set up periodic verification after exam starts
+  useEffect(() => {
+    if (examStarted && verificationComplete && !examComplete) {
+      // Schedule first verification after 5 minutes (300 seconds)
+      const firstVerificationAt = timeLeft - 300;
+      setNextVerificationTime(firstVerificationAt);
+    }
+  }, [examStarted, verificationComplete, examComplete]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -96,10 +126,45 @@ const Exam = () => {
 
   const handleStartExam = () => {
     setExamStarted(true);
-    toast({
-      title: "Exam Started",
-      description: "You have 30 minutes to complete the exam. Good luck!",
+  };
+
+  const handleVerificationComplete = (images: { selfie: string; environment: string }) => {
+    const now = new Date().toISOString();
+    
+    setVerificationImages({
+      selfie: images.selfie,
+      environment: images.environment,
+      verificationTimes: [...verificationImages.verificationTimes, now]
     });
+    
+    setVerificationComplete(true);
+    
+    toast({
+      title: "Verification Successful",
+      description: "Your identity has been verified. You may now begin the exam.",
+    });
+  };
+
+  const triggerVerification = () => {
+    setShowVerificationModal(true);
+    // Pause the timer while verification is in progress
+    // This is handled by the useEffect that runs the timer
+  };
+
+  const handleVerificationDuringExam = () => {
+    const now = new Date().toISOString();
+    
+    setVerificationImages(prev => ({
+      ...prev,
+      verificationTimes: [...prev.verificationTimes, now]
+    }));
+    
+    setShowVerificationModal(false);
+    
+    // Schedule next verification after 7-10 minutes (random)
+    const nextVerification = Math.floor(Math.random() * (600 - 420 + 1) + 420); // 7-10 minutes in seconds
+    const nextVerificationAt = timeLeft - nextVerification;
+    setNextVerificationTime(nextVerificationAt > 0 ? nextVerificationAt : 0);
   };
 
   const handleNext = () => {
@@ -161,7 +226,7 @@ const Exam = () => {
     <div className="min-h-screen bg-eduPrimary-light">
       <Navbar />
       
-      <div className="pt-28 pb-16 px-4">
+      <div className="pt-28 pb-16 px-4 md:px-8">
         {!examStarted ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -198,6 +263,8 @@ const Exam = () => {
                       <li>You can navigate between questions using the Previous and Next buttons.</li>
                       <li>Your progress is automatically saved.</li>
                       <li>Submit your exam once you have completed all questions.</li>
+                      <li><strong>You must complete an identity verification before starting.</strong></li>
+                      <li><strong>Random verification checks may occur during the exam.</strong></li>
                     </ul>
                   </div>
                 </div>
@@ -271,13 +338,31 @@ const Exam = () => {
                 <Button variant="primary" onClick={() => {
                   setExamStarted(false);
                   setExamComplete(false);
+                  setVerificationComplete(false);
                   setAnswers({});
                   setCurrentQuestionIndex(0);
                   setTimeLeft(30 * 60);
+                  setVerificationImages({
+                    selfie: null,
+                    environment: null,
+                    verificationTimes: []
+                  });
                 }}>
                   Take Another Exam
                 </Button>
               </div>
+            </GlassCard>
+          </motion.div>
+        ) : !verificationComplete ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="max-w-3xl mx-auto"
+          >
+            <GlassCard className="p-8">
+              <h1 className="text-3xl font-bold mb-6 text-center">Identity Verification Required</h1>
+              <PhotoVerification onComplete={handleVerificationComplete} />
             </GlassCard>
           </motion.div>
         ) : (
@@ -324,6 +409,30 @@ const Exam = () => {
                 </div>
               </GlassCard>
             </div>
+            
+            {/* Periodic Verification Modal */}
+            <Dialog open={showVerificationModal} onOpenChange={(open) => {
+              // Prevent closing by clicking outside
+              if (!open && showVerificationModal) {
+                return;
+              }
+              setShowVerificationModal(open);
+            }}>
+              <DialogContent className="sm:max-w-md" hideClose>
+                <div className="py-4">
+                  <h2 className="text-xl font-bold mb-4 text-center">Random Verification Check</h2>
+                  <p className="mb-6 text-center">
+                    This is a routine verification check to ensure academic integrity.
+                    Please complete the verification to continue your exam.
+                  </p>
+                  <PhotoVerification 
+                    onComplete={handleVerificationComplete}
+                    isVerificationTime={true}
+                    onVerificationComplete={handleVerificationDuringExam}
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
       </div>
