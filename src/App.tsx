@@ -12,8 +12,11 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import LecturerDashboard from "./pages/LecturerDashboard";
 import LecturerReports from "./pages/LecturerReports";
+import LecturerTestResults from "./pages/LecturerTestResults";
 import StudentDashboard from "./pages/StudentDashboard";
 import Results from "./pages/Results";
+import TestDetails from "./pages/TestDetails";
+import ModuleTests from "./pages/ModuleTests";
 
 const queryClient = new QueryClient();
 
@@ -31,8 +34,11 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/lecturer" element={<LecturerDashboard />} />
           <Route path="/lecturer/reports" element={<LecturerReports />} />
+          <Route path="/lecturer/results" element={<LecturerTestResults />} />
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/test-details" element={<TestDetails />} />
+          <Route path="/module-tests" element={<ModuleTests />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
