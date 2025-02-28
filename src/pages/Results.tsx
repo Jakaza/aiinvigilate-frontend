@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Award, FileText, BookOpen, ArrowLeft, User, Calendar, Clock } from 'lucide-react';
+import { Award, FileText, BookOpen, ArrowLeft, Calendar, Clock } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import GlassCard from '../components/ui-custom/GlassCard';
 import Button from '../components/ui-custom/Button';
