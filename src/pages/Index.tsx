@@ -63,22 +63,6 @@ const Index = () => {
               </div>
             </motion.div>
           </div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-4xl mx-auto mt-16"
-          >
-            <GlassCard className="p-2 shadow-medium overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" 
-                alt="Student taking an exam"
-                className="w-full h-full object-cover rounded-lg"
-                loading="lazy"
-              />
-            </GlassCard>
-          </motion.div>
         </div>
       </section>
       

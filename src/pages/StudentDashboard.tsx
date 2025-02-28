@@ -24,6 +24,9 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import AdminNavbar from '@/components/layout/AdminNavbar';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
 
 // Mock user data
 const studentUser = {
@@ -80,6 +83,71 @@ const StudentDashboard = () => {
   const upcomingTests = mockAvailableTests.filter(test => 
     test.status === "upcoming" || test.status === "pending"
   );
+  
+  // Edit profile state
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: studentUser.name,
+    surname: studentUser.surname,
+    email: studentUser.email,
+    profileImage: studentUser.profileImage,
+  });
+
+  // Module tests dialog state
+  const [selectedModule, setSelectedModule] = useState<string | null>(null);
+  const [isModuleTestsOpen, setIsModuleTestsOpen] = useState(false);
+  
+  // Test details dialog state
+  const [selectedTest, setSelectedTest] = useState<typeof mockTestResults[0] | null>(null);
+  const [isTestDetailsOpen, setIsTestDetailsOpen] = useState(false);
+  
+  // Handlers for the profile edit form
+  const handleEditProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  
+  const handleSaveProfile = () => {
+    // In a real application, this would send the data to an API
+    toast({
+      title: "Profile Updated",
+      description: "Your profile changes have been saved successfully.",
+    });
+    setIsEditProfileOpen(false);
+  };
+  
+  // Handler for module click
+  const handleModuleClick = (moduleCode: string) => {
+    setSelectedModule(moduleCode);
+    setIsModuleTestsOpen(true);
+  };
+  
+  // Handler for test result click
+  const handleTestResultClick = (test: typeof mockTestResults[0]) => {
+    setSelectedTest(test);
+    setIsTestDetailsOpen(true);
+  };
+  
+  // Filter tests by selected module
+  const getModuleTests = (moduleCode: string) => {
+    return mockAvailableTests.filter(test => test.module === moduleCode);
+  };
+  
+  // Mock test details for demonstration
+  const getTestDetails = (testId: number) => {
+    const mockQuestions = [
+      { id: 1, question: "What is a database?", yourAnswer: "A structured collection of data", correctAnswer: "A structured collection of data", isCorrect: true },
+      { id: 2, question: "What is SQL?", yourAnswer: "Structured Query Language", correctAnswer: "Structured Query Language", isCorrect: true },
+      { id: 3, question: "What is a primary key?", yourAnswer: "A field that uniquely identifies each record", correctAnswer: "A field that uniquely identifies each record", isCorrect: true },
+      { id: 4, question: "What is normalization?", yourAnswer: "Process of organizing data to reduce redundancy", correctAnswer: "Process of organizing data to reduce redundancy", isCorrect: true },
+      { id: 5, question: "What is a foreign key?", yourAnswer: "A key that refers to another table's key", correctAnswer: "A key that links to another table's primary key", isCorrect: false },
+    ];
+    
+    return mockQuestions;
+  };
   
   const formatRemainingTime = (dueDate: string) => {
     const now = new Date();
@@ -175,7 +243,11 @@ const StudentDashboard = () => {
                       <span className="font-medium">{new Date(studentUser.enrollmentDate).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <Button variant="primary" className="mt-6 w-full">
+                  <Button 
+                    variant="primary" 
+                    className="mt-6 w-full"
+                    onClick={() => setIsEditProfileOpen(true)}
+                  >
                     Edit Profile
                   </Button>
                 </div>
@@ -303,6 +375,15 @@ const StudentDashboard = () => {
                           </div>
                           <Progress value={(result.score / result.maxScore) * 100} className="h-2" />
                         </div>
+                        <div className="mt-3 text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleTestResultClick(result)}
+                          >
+                            View Details
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -357,7 +438,11 @@ const StudentDashboard = () => {
                   <TableBody>
                     {filteredModules.length > 0 ? (
                       filteredModules.map((module) => (
-                        <TableRow key={module.code}>
+                        <TableRow 
+                          key={module.code} 
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => handleModuleClick(module.code)}
+                        >
                           <TableCell className="font-medium">{module.code}</TableCell>
                           <TableCell>{module.name}</TableCell>
                           <TableCell className="text-center">{module.credits}</TableCell>
@@ -445,7 +530,13 @@ const StudentDashboard = () => {
                           {test.status === "completed" && (
                             <Button
                               variant="secondary"
-                              to={`/results?test=${test.id}`}
+                              onClick={() => {
+                                // Find the test result
+                                const result = mockTestResults.find(r => r.name === test.name);
+                                if (result) {
+                                  handleTestResultClick(result);
+                                }
+                              }}
                             >
                               View Results
                             </Button>
@@ -503,7 +594,7 @@ const StudentDashboard = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              to={`/results?test=${result.id}`}
+                              onClick={() => handleTestResultClick(result)}
                             >
                               View Details
                             </Button>
@@ -524,6 +615,241 @@ const StudentDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Edit Profile Modal */}
+      <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your personal information here.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex justify-center mb-4">
+              <Avatar className="h-24 w-24 border-2 border-eduAccent">
+                <AvatarImage src={profileForm.profileImage || undefined} alt={`${profileForm.name} ${profileForm.surname}`} />
+                <AvatarFallback>{profileForm.name.charAt(0)}{profileForm.surname.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="profileImage" className="text-right">
+                Avatar URL
+              </Label>
+              <Input
+                id="profileImage"
+                name="profileImage"
+                className="col-span-3"
+                value={profileForm.profileImage || ''}
+                onChange={handleEditProfileChange}
+                placeholder="Enter image URL"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                First Name
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                className="col-span-3"
+                value={profileForm.name}
+                onChange={handleEditProfileChange}
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="surname" className="text-right">
+                Last Name
+              </Label>
+              <Input
+                id="surname"
+                name="surname"
+                className="col-span-3"
+                value={profileForm.surname}
+                onChange={handleEditProfileChange}
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                className="col-span-3"
+                value={profileForm.email}
+                onChange={handleEditProfileChange}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsEditProfileOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSaveProfile}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Module Tests Modal */}
+      <Dialog open={isModuleTestsOpen} onOpenChange={setIsModuleTestsOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedModule && `Tests for ${selectedModule}`}
+            </DialogTitle>
+            <DialogDescription>
+              View all tests available for this module.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedModule && getModuleTests(selectedModule).length > 0 ? (
+              <div className="space-y-4">
+                {getModuleTests(selectedModule).map((test) => (
+                  <div key={test.id} className="p-4 border rounded-md">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">{test.name}</h3>
+                        <p className="text-sm text-eduText-light">Duration: {test.duration}</p>
+                        <p className="text-sm text-eduText-light">
+                          Due: {new Date(test.dueDate).toLocaleDateString()} at {new Date(test.dueDate).toLocaleTimeString()}
+                        </p>
+                      </div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(test.status)}`}>
+                        {test.status.charAt(0).toUpperCase() + test.status.slice(1)}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-4">
+                      {test.status === "pending" && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          to={`/exam?id=${test.id}`}
+                        >
+                          Start Test
+                        </Button>
+                      )}
+                      
+                      {test.status === "upcoming" && (
+                        <p className="text-sm font-medium">
+                          Available in {formatRemainingTime(test.dueDate)}
+                        </p>
+                      )}
+                      
+                      {test.status === "completed" && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            // Find the test result
+                            const result = mockTestResults.find(r => r.name === test.name);
+                            if (result) {
+                              setIsModuleTestsOpen(false);
+                              handleTestResultClick(result);
+                            }
+                          }}
+                        >
+                          View Results
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FileText className="mx-auto h-12 w-12 text-eduText-light opacity-50" />
+                <h3 className="mt-4 text-lg font-medium">No Tests Available</h3>
+                <p className="mt-2 text-eduText-light">
+                  There are no tests available for this module at the moment.
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Test Details Modal */}
+      <Dialog open={isTestDetailsOpen} onOpenChange={setIsTestDetailsOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedTest?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Test results and feedback
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedTest && (
+              <>
+                <div className="flex justify-between mb-6">
+                  <div>
+                    <h3 className="font-medium text-sm mb-1">Module</h3>
+                    <p>{selectedTest.module}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm mb-1">Date</h3>
+                    <p>{new Date(selectedTest.date).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm mb-1">Score</h3>
+                    <p className="font-bold text-lg">{selectedTest.score}/{selectedTest.maxScore} ({selectedTest.score}%)</p>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <Progress value={(selectedTest.score / selectedTest.maxScore) * 100} className="h-2 w-full mb-1" />
+                  <div className="flex justify-between text-xs text-eduText-light">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-4">Question Breakdown</h3>
+                  <div className="space-y-4">
+                    {getTestDetails(selectedTest.id).map((question, index) => (
+                      <div key={question.id} className={`p-4 border rounded-md ${question.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                        <div className="flex justify-between mb-2">
+                          <h4 className="font-medium">Question {index + 1}</h4>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${question.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {question.isCorrect ? 'Correct' : 'Incorrect'}
+                          </span>
+                        </div>
+                        <p className="mb-4">{question.question}</p>
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-sm font-medium">Your Answer:</span>
+                            <p className={question.isCorrect ? 'text-green-700' : 'text-red-700'}>
+                              {question.yourAnswer}
+                            </p>
+                          </div>
+                          {!question.isCorrect && (
+                            <div>
+                              <span className="text-sm font-medium">Correct Answer:</span>
+                              <p className="text-green-700">{question.correctAnswer}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
