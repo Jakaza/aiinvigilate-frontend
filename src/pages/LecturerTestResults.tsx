@@ -59,7 +59,7 @@ const mockTestData: TestData = {
     { id: 5, studentId: "S12349", studentName: "Charlie Wilson", score: 65, maxScore: 100, submittedAt: "2024-05-11T15:40:00", timeSpent: "88 min", status: "completed" },
     { id: 6, studentId: "S12350", studentName: "Diana Miller", score: 0, maxScore: 100, submittedAt: "", timeSpent: "", status: "not-started" },
     { id: 7, studentId: "S12351", studentName: "Ethan Davis", score: 73, maxScore: 100, submittedAt: "2024-05-10T16:25:00", timeSpent: "83 min", status: "completed" },
-    { id: 8, studentId: "S12352", studentName: "Fiona Clark", score: 0, maxScore: 100, submittedAt: "2024-05-11T10:10:00", timeSpent: "25 min", status: "in-progress" },
+    { id: 8, studentId: "S12352", studentName: "Fiona Clark", score: 0, maxScore: 100, submittedAt: "2024-05-11T10:10:00", timeSpent: "25 min", status: "in-progress" }
   ]
 };
 
@@ -244,7 +244,7 @@ const LecturerTestResults = () => {
                       </div>
                       <div>
                         <div className="flex justify-between mb-1 text-sm">
-                          <span>Below Average (<60%)</span>
+                          <span>Below Average (&lt;60%)</span>
                           <span>{distribution.below} students</span>
                         </div>
                         <Progress value={(distribution.below / testData.totalSubmissions) * 100} className="h-2 bg-gray-200" />
