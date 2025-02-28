@@ -418,7 +418,7 @@ const Exam = () => {
               }
               setShowVerificationModal(open);
             }}>
-              <DialogContent className="sm:max-w-md" hideClose>
+              <DialogContent className="sm:max-w-md">
                 <div className="py-4">
                   <h2 className="text-xl font-bold mb-4 text-center">Random Verification Check</h2>
                   <p className="mb-6 text-center">

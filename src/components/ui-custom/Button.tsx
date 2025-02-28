@@ -91,12 +91,18 @@ const Button = (props: ButtonProps) => {
 
   // Render as Link or button based on the presence of 'to' prop
   if (isLink(props)) {
+    // Fixed: Create a custom onClick handler for the Link component
+    const linkProps = {...rest} as Omit<LinkProps, 'to'>;
+    const handleLinkClick = disabled 
+      ? (e: React.MouseEvent<HTMLAnchorElement>) => e.preventDefault() 
+      : linkProps.onClick;
+
     return (
       <Link 
         className={buttonClassName} 
         to={props.to} 
-        {...rest as Omit<LinkProps, 'to'>}
-        onClick={disabled ? (e) => e.preventDefault() : rest.onClick}
+        {...linkProps}
+        onClick={handleLinkClick}
       >
         {content}
       </Link>
