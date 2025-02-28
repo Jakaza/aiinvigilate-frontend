@@ -170,7 +170,7 @@ const LecturerTestResults = () => {
                 </div>
                 
                 <Button 
-                  variant="outline" 
+                  variant="secondary" 
                   className="mt-4 md:mt-0"
                   onClick={() => {
                     // In a real app, this would download a CSV or Excel file
