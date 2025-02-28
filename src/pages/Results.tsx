@@ -7,8 +7,30 @@ import GlassCard from '../components/ui-custom/GlassCard';
 import Button from '../components/ui-custom/Button';
 import { Progress } from "@/components/ui/progress";
 
+// Define the types for our quiz questions
+interface QuizQuestion {
+  id: number;
+  question: string;
+  yourAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+}
+
+// Define the test result type
+interface TestResult {
+  id: number;
+  name: string;
+  module: string;
+  moduleFullName: string;
+  score: number;
+  maxScore: number;
+  date: string;
+  duration: string;
+  questions: QuizQuestion[];
+}
+
 // Mock test results
-const mockTestResults = [
+const mockTestResults: TestResult[] = [
   { 
     id: 1, 
     name: "Introduction to Programming Final", 
@@ -99,7 +121,7 @@ const mockTestResults = [
 const Results = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [testResult, setTestResult] = useState<typeof mockTestResults[0] | null>(null);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
   
   useEffect(() => {
     // Get test ID from URL query parameter
@@ -114,7 +136,7 @@ const Results = () => {
     }
   }, [location]);
   
-  const getCorrectAnswersCount = (questions: typeof testResult?.questions) => {
+  const getCorrectAnswersCount = (questions: QuizQuestion[] | undefined) => {
     if (!questions) return 0;
     return questions.filter(q => q.isCorrect).length;
   };
