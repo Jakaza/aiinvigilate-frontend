@@ -8,11 +8,10 @@ import { TestResult } from './types';
 
 interface RecentResultsProps {
   results: TestResult[];
-  onViewDetails: (result: TestResult) => void;
   onViewAll: () => void;
 }
 
-const RecentResults: React.FC<RecentResultsProps> = ({ results, onViewDetails, onViewAll }) => {
+const RecentResults: React.FC<RecentResultsProps> = ({ results, onViewAll }) => {
   return (
     <GlassCard className="p-6">
       <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -43,7 +42,7 @@ const RecentResults: React.FC<RecentResultsProps> = ({ results, onViewDetails, o
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onViewDetails(result)}
+                to={`/results?test=${result.id}`}
               >
                 View Details
               </Button>

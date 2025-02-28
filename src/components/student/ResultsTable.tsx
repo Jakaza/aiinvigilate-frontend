@@ -16,10 +16,9 @@ import { TestResult } from './types';
 
 interface ResultsTableProps {
   results: TestResult[];
-  onViewDetails: (result: TestResult) => void;
 }
 
-const ResultsTable: React.FC<ResultsTableProps> = ({ results, onViewDetails }) => {
+const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
   return (
     <GlassCard className="p-6">
       <h2 className="text-xl font-semibold flex items-center mb-6">
@@ -55,7 +54,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results, onViewDetails }) =
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onViewDetails(result)}
+                      to={`/results?test=${result.id}`}
                     >
                       View Details
                     </Button>

@@ -16,13 +16,10 @@ import {
   TestsList,
   ResultsTable,
   EditProfileDialog,
-  TestDetailsDialog,
-  ModuleTestsDialog,
   Student,
   Module,
   Test,
   TestResult,
-  QuestionDetail,
   ProfileFormData
 } from '@/components/student';
 
@@ -84,12 +81,6 @@ const StudentDashboard = () => {
   
   // Dialog states
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [isModuleTestsOpen, setIsModuleTestsOpen] = useState(false);
-  const [isTestDetailsOpen, setIsTestDetailsOpen] = useState(false);
-  
-  // Selected items
-  const [selectedModule, setSelectedModule] = useState<string | null>(null);
-  const [selectedTest, setSelectedTest] = useState<TestResult | null>(null);
   
   // Form data
   const [profileForm, setProfileForm] = useState<ProfileFormData>({
@@ -115,34 +106,6 @@ const StudentDashboard = () => {
       description: "Your profile changes have been saved successfully.",
     });
     setIsEditProfileOpen(false);
-  };
-  
-  const handleModuleClick = (moduleCode: string) => {
-    setSelectedModule(moduleCode);
-    setIsModuleTestsOpen(true);
-  };
-  
-  const handleTestResultClick = (test: TestResult) => {
-    setSelectedTest(test);
-    setIsTestDetailsOpen(true);
-  };
-  
-  // Filter tests by selected module
-  const getModuleTests = (moduleCode: string) => {
-    return mockAvailableTests.filter(test => test.module === moduleCode);
-  };
-  
-  // Mock test details for demonstration
-  const getTestDetails = (testId: number): QuestionDetail[] => {
-    const mockQuestions: QuestionDetail[] = [
-      { id: 1, question: "What is a database?", yourAnswer: "A structured collection of data", correctAnswer: "A structured collection of data", isCorrect: true },
-      { id: 2, question: "What is SQL?", yourAnswer: "Structured Query Language", correctAnswer: "Structured Query Language", isCorrect: true },
-      { id: 3, question: "What is a primary key?", yourAnswer: "A field that uniquely identifies each record", correctAnswer: "A field that uniquely identifies each record", isCorrect: true },
-      { id: 4, question: "What is normalization?", yourAnswer: "Process of organizing data to reduce redundancy", correctAnswer: "Process of organizing data to reduce redundancy", isCorrect: true },
-      { id: 5, question: "What is a foreign key?", yourAnswer: "A key that refers to another table's key", correctAnswer: "A key that links to another table's primary key", isCorrect: false },
-    ];
-    
-    return mockQuestions;
   };
   
   return (
@@ -190,7 +153,6 @@ const StudentDashboard = () => {
                 {/* Recent Results */}
                 <RecentResults 
                   results={mockTestResults} 
-                  onViewDetails={handleTestResultClick}
                   onViewAll={() => setActiveTab("results")}
                 />
               </div>
@@ -203,7 +165,6 @@ const StudentDashboard = () => {
               modules={filteredModules}
               statusFilter={moduleStatusFilter}
               onFilterChange={setModuleStatusFilter}
-              onModuleClick={handleModuleClick}
             />
           </TabsContent>
           
@@ -212,7 +173,6 @@ const StudentDashboard = () => {
             <TestsList 
               tests={mockAvailableTests}
               testResults={mockTestResults}
-              onViewTestResult={handleTestResultClick}
             />
           </TabsContent>
           
@@ -220,7 +180,6 @@ const StudentDashboard = () => {
           <TabsContent value="results">
             <ResultsTable 
               results={mockTestResults}
-              onViewDetails={handleTestResultClick}
             />
           </TabsContent>
         </Tabs>
@@ -233,22 +192,6 @@ const StudentDashboard = () => {
         profileForm={profileForm}
         onChange={handleEditProfileChange}
         onSave={handleSaveProfile}
-      />
-      
-      <ModuleTestsDialog
-        open={isModuleTestsOpen}
-        onOpenChange={setIsModuleTestsOpen}
-        moduleCode={selectedModule}
-        getModuleTests={getModuleTests}
-        testResults={mockTestResults}
-        onViewTestResult={handleTestResultClick}
-      />
-      
-      <TestDetailsDialog
-        open={isTestDetailsOpen}
-        onOpenChange={setIsTestDetailsOpen}
-        test={selectedTest}
-        getTestDetails={getTestDetails}
       />
     </div>
   );

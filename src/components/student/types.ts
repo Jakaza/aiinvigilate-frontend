@@ -26,6 +26,7 @@ export interface Test {
   id: number;
   name: string;
   module: string;
+  moduleId?: string; // Added moduleId
   duration: string;
   dueDate: string;
   status: "upcoming" | "pending" | "completed";

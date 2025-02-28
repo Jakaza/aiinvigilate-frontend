@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { BookOpen, Clock, List, Plus, Save, Trash2, Edit2, Check, X, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -18,10 +19,21 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import AdminNavbar from '@/components/layout/AdminNavbar';
 
+// Mock modules data for dropdown
+const mockModules = [
+  { id: "CS101", name: "Introduction to Computer Science" },
+  { id: "CS202", name: "Data Structures and Algorithms" },
+  { id: "CS303", name: "Database Management Systems" },
+  { id: "CS404", name: "Software Engineering" },
+  { id: "CS505", name: "Web Development" },
+  { id: "CS606", name: "Artificial Intelligence" },
+];
+
 // Basic test schema
 const testSchema = z.object({
   name: z.string().min(3, { message: "Test name must be at least 3 characters" }),
   description: z.string().min(10, { message: "Description must be at least 10 characters" }),
+  moduleId: z.string({ required_error: "Please select a module" }),
   hours: z.string().refine((val) => !isNaN(Number(val)), { message: "Hours must be a number" }),
   minutes: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) < 60, {
     message: "Minutes must be between 0 and 59",
@@ -76,6 +88,7 @@ type QuestionFormValues = z.infer<typeof questionSchema>;
 
 const LecturerDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("test-details");
   const [test, setTest] = useState<TestFormValues | null>(null);
   const [questions, setQuestions] = useState<QuestionFormValues[]>([]);
@@ -88,6 +101,7 @@ const LecturerDashboard = () => {
     defaultValues: {
       name: "",
       description: "",
+      moduleId: "",
       hours: "1",
       minutes: "30",
     },
@@ -264,6 +278,9 @@ const LecturerDashboard = () => {
       return;
     }
     
+    // Find module name based on moduleId
+    const selectedModule = mockModules.find(m => m.id === test.moduleId);
+    
     // Here you would normally save the test to your backend
     toast.success("Test saved successfully", {
       description: "Your test has been created and saved.",
@@ -271,11 +288,12 @@ const LecturerDashboard = () => {
     
     console.log("Saving test:", {
       ...test,
+      moduleName: selectedModule?.name,
       questions,
     });
     
-    // Optional: Reset and navigate back
-    // navigate("/lecturer/tests");
+    // Navigate to the test details page
+    navigate(`/test-details?id=1&role=lecturer`);
   };
   
   return (
@@ -338,6 +356,37 @@ const LecturerDashboard = () => {
                         </FormControl>
                         <FormDescription>
                           Provide details about what the test covers.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={testForm.control}
+                    name="moduleId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Module</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a module" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {mockModules.map((module) => (
+                              <SelectItem key={module.id} value={module.id}>
+                                {module.id} - {module.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Select the module this test belongs to.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -420,6 +469,9 @@ const LecturerDashboard = () => {
                   <div className="flex flex-wrap justify-between items-center mb-6">
                     <div>
                       <h3 className="text-xl font-semibold">{test.name}</h3>
+                      <p className="text-sm text-eduText-light mt-1">
+                        Module: {mockModules.find(m => m.id === test.moduleId)?.name} ({test.moduleId})
+                      </p>
                       <p className="text-sm text-eduText-light mt-1">
                         Duration: {test.hours} hours {test.minutes} minutes
                       </p>

@@ -9,10 +9,9 @@ import { formatRemainingTime, getStatusClass } from './utils';
 interface TestsListProps {
   tests: Test[];
   testResults: TestResult[];
-  onViewTestResult: (result: TestResult) => void;
 }
 
-const TestsList: React.FC<TestsListProps> = ({ tests, testResults, onViewTestResult }) => {
+const TestsList: React.FC<TestsListProps> = ({ tests, testResults }) => {
   return (
     <GlassCard className="p-6">
       <h2 className="text-xl font-semibold flex items-center mb-6">
@@ -63,9 +62,9 @@ const TestsList: React.FC<TestsListProps> = ({ tests, testResults, onViewTestRes
                       </p>
                       <Button
                         variant="secondary"
-                        disabled
+                        to={`/test-details?id=${test.id}&role=student`}
                       >
-                        Not Available Yet
+                        View Details
                       </Button>
                     </div>
                   )}
@@ -73,13 +72,7 @@ const TestsList: React.FC<TestsListProps> = ({ tests, testResults, onViewTestRes
                   {test.status === "completed" && (
                     <Button
                       variant="secondary"
-                      onClick={() => {
-                        // Find the test result
-                        const result = testResults.find(r => r.name === test.name);
-                        if (result) {
-                          onViewTestResult(result);
-                        }
-                      }}
+                      to={`/results?test=${test.id}`}
                     >
                       View Results
                     </Button>

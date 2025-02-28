@@ -12,19 +12,18 @@ import {
 } from "@/components/ui/table";
 import { Module } from './types';
 import { getStatusClass } from './utils';
+import { Link } from 'react-router-dom';
 
 interface ModuleTableProps {
   modules: Module[];
   statusFilter: string;
   onFilterChange: (filter: string) => void;
-  onModuleClick: (moduleCode: string) => void;
 }
 
 const ModuleTable: React.FC<ModuleTableProps> = ({ 
   modules, 
   statusFilter, 
-  onFilterChange, 
-  onModuleClick 
+  onFilterChange
 }) => {
   return (
     <GlassCard className="p-6">
@@ -65,10 +64,17 @@ const ModuleTable: React.FC<ModuleTableProps> = ({
                 <TableRow 
                   key={module.code} 
                   className="cursor-pointer hover:bg-gray-50"
-                  onClick={() => onModuleClick(module.code)}
                 >
-                  <TableCell className="font-medium">{module.code}</TableCell>
-                  <TableCell>{module.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link to={`/module-tests?code=${module.code}`} className="hover:text-eduAccent transition-colors">
+                      {module.code}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Link to={`/module-tests?code=${module.code}`} className="hover:text-eduAccent transition-colors">
+                      {module.name}
+                    </Link>
+                  </TableCell>
                   <TableCell className="text-center">{module.credits}</TableCell>
                   <TableCell className="text-center">{module.grade}</TableCell>
                   <TableCell className="text-center">
