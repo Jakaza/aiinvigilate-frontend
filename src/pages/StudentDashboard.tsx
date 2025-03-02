@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminNavbar from '@/components/layout/AdminNavbar';
@@ -135,27 +134,15 @@ const StudentDashboard = () => {
           
           {/* Overview Tab */}
           <TabsContent value="overview">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Profile Card */}
+            <div className="grid grid-cols-1 gap-6">
+              {/* Profile Card - Full Width */}
               <ProfileCard 
                 student={studentUser} 
                 onEditProfile={() => setIsEditProfileOpen(true)} 
               />
               
-              {/* Dashboard Overview */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Stats */}
-                <StatsCards modules={mockModules} upcomingTests={upcomingTests} />
-                
-                {/* Upcoming Tests */}
-                <UpcomingTests tests={upcomingTests} />
-                
-                {/* Recent Results */}
-                <RecentResults 
-                  results={mockTestResults} 
-                  onViewAll={() => setActiveTab("results")}
-                />
-              </div>
+              {/* Upcoming Tests - Below Profile */}
+              <UpcomingTests tests={upcomingTests} />
             </div>
           </TabsContent>
           

@@ -42,7 +42,7 @@ const Index = () => {
                 Educational Platform
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Master Your Knowledge with EduExam
+                AI-Powered Exams for Smarter Testing
               </h1>
               <p className="text-xl text-eduText-light mb-8">
                 An elegant platform designed to help you assess your knowledge through carefully crafted examinations.
