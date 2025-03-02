@@ -16,6 +16,63 @@ import Button from '../components/ui-custom/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+// Define South African ID validation pattern
+const validateSouthAfricanID = (id: string) => {
+  // Length Validation (Must be 13 digits)
+  if (id.length !== 13) {
+    return false;
+  }
+  
+  // Numeric Validation (Only digits allowed)
+  if (!/^\d+$/.test(id)) {
+    return false;
+  }
+  
+  // Extract birth date components
+  const year = parseInt(id.substring(0, 2));
+  const month = parseInt(id.substring(2, 4));
+  const day = parseInt(id.substring(4, 6));
+  
+  // Create full year (assuming 1900s if year > current 2-digit year, otherwise 2000s)
+  const currentYear = new Date().getFullYear() % 100;
+  const fullYear = year > currentYear ? 1900 + year : 2000 + year;
+  
+  // Date Validation (Valid birth date in first 6 digits)
+  const birthDate = new Date(fullYear, month - 1, day);
+  if (
+    birthDate.getFullYear() !== fullYear ||
+    birthDate.getMonth() !== month - 1 ||
+    birthDate.getDate() !== day ||
+    birthDate > new Date() // Future dates are invalid
+  ) {
+    return false;
+  }
+  
+  // Gender Validation (7th digit for gender)
+  const genderDigit = parseInt(id.charAt(6));
+  if (![0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(genderDigit)) {
+    return false;
+  }
+  
+  // Citizenship Validation (11th digit: 0 for SA, 1 for other)
+  const citizenshipDigit = parseInt(id.charAt(10));
+  if (![0, 1].includes(citizenshipDigit)) {
+    return false;
+  }
+  
+  return true;
+};
+
+// Available courses/programs
+const availableCourses = [
+  { id: "cs", name: "Computer Science" },
+  { id: "eng", name: "Engineering" },
+  { id: "bus", name: "Business Administration" },
+  { id: "med", name: "Medical Sciences" },
+  { id: "arts", name: "Arts and Humanities" },
+  { id: "edu", name: "Education" },
+];
+
 // Define the form schema with Zod
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -24,12 +81,21 @@ const registerSchema = z.object({
     required_error: "Please select a gender" 
   }),
   email: z.string().email({ message: "Please enter a valid email address" }),
-  idNumber: z.string().min(5, { message: "ID number must be at least 5 characters" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  idNumber: z.string().refine(
+    (id) => validateSouthAfricanID(id),
+    { message: "Please enter a valid South African ID number (13 digits in YYMMDDSSSCAZ format)" }
+  ),
+  password: z.string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[0-9]/, { message: "Password must contain at least one number" })
+    .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
   confirmPassword: z.string(),
-  role: z.enum(["admin", "lecturer", "student"], { 
+  role: z.enum(["lecturer", "student"], { 
     required_error: "Please select a role" 
   }),
+  course: z.string().min(1, { message: "Please select a course/program" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -54,6 +120,7 @@ const Register = () => {
       password: "",
       confirmPassword: "",
       role: undefined,
+      course: "",
     },
   });
 
@@ -186,10 +253,17 @@ const Register = () => {
                   name="idNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ID Number</FormLabel>
+                      <FormLabel>South African ID Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your ID number" {...field} />
+                        <Input 
+                          placeholder="13-digit South African ID number" 
+                          maxLength={13}
+                          {...field} 
+                        />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Format: YYMMDDSSSCAZ (13 digits)
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -217,6 +291,9 @@ const Register = () => {
                           </button>
                         </div>
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Must contain at least 8 characters, uppercase, lowercase, number, and special character
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -267,7 +344,34 @@ const Register = () => {
                         <SelectContent>
                           <SelectItem value="student">Student</SelectItem>
                           <SelectItem value="lecturer">Lecturer</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="course"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course/Program</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your course/program" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableCourses.map(course => (
+                            <SelectItem key={course.id} value={course.id}>
+                              {course.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
