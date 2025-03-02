@@ -122,6 +122,7 @@ const Register = () => {
       role: undefined,
       course: "",
     },
+    mode: "onChange", // This enables validation to run on change, helping clear errors as user types
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
@@ -179,7 +180,7 @@ const Register = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>Name <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Enter your name" {...field} />
                         </FormControl>
@@ -193,7 +194,7 @@ const Register = () => {
                     name="surname"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Surname</FormLabel>
+                        <FormLabel>Surname <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Enter your surname" {...field} />
                         </FormControl>
@@ -208,7 +209,7 @@ const Register = () => {
                   name="gender"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel>Gender</FormLabel>
+                      <FormLabel>Gender <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
@@ -239,7 +240,7 @@ const Register = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="Enter your email" {...field} />
                       </FormControl>
@@ -253,7 +254,7 @@ const Register = () => {
                   name="idNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>South African ID Number</FormLabel>
+                      <FormLabel>South African ID Number <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="13-digit South African ID number" 
@@ -274,7 +275,7 @@ const Register = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Password <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input 
@@ -304,7 +305,7 @@ const Register = () => {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
+                      <FormLabel>Confirm Password <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input 
@@ -331,7 +332,7 @@ const Register = () => {
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Role</FormLabel>
+                      <FormLabel>Role <span className="text-red-500">*</span></FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
@@ -356,7 +357,7 @@ const Register = () => {
                   name="course"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Course/Program</FormLabel>
+                      <FormLabel>Course/Program <span className="text-red-500">*</span></FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
