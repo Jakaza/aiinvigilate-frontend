@@ -37,28 +37,62 @@ const Login = () => {
   const onSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      try {
-        // Here you would normally make an API call to your backend
-        console.log("Login attempted:", values);
-        
-        // Show success message
-        toast.success("Login successful!", {
-          description: "Welcome to EduExam platform.",
-        });
-        
-        // Redirect to home page
-        navigate("/");
-      } catch (error) {
-        // Show error message
-        toast.error("Login failed", {
-          description: "Invalid email or password. Please try again.",
-        });
-      } finally {
-        setIsSubmitting(false);
+    try {
+      // Make the API call
+      const response = await fetch('http://localhost:8800/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
       }
-    }, 1500);
+      
+      // Store token or user data in localStorage if needed
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
+      
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      // Show success message
+      toast.success("Login successful!", {
+        description: "Welcome to EduExam platform.",
+      });
+      
+      // Redirect based on user role if provided, otherwise go to home
+      if (data.user && data.user.role) {
+        switch (data.user.role) {
+          case 'student':
+            navigate("/student-dashboard");
+            break;
+          case 'lecturer':
+            navigate("/lecturer-dashboard");
+            break;
+          default:
+            navigate("/");
+        }
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("Login failed", {
+        description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);

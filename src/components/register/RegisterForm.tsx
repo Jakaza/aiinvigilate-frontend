@@ -39,23 +39,47 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ courses, isLoadingCourses }
   const onSubmit = async (values: RegisterFormValues) => {
     setIsSubmitting(true);
     
-    setTimeout(() => {
-      try {
-        console.log("Form submitted:", values);
-        
-        toast.success("Registration successful!", {
-          description: "Your account has been created. Please log in.",
-        });
-        
-        navigate("/login");
-      } catch (error) {
-        toast.error("Registration failed", {
-          description: "There was an error creating your account. Please try again.",
-        });
-      } finally {
-        setIsSubmitting(false);
+    try {
+      // Prepare the data to send to the backend
+      const userData = {
+        name: values.name,
+        surname: values.surname,
+        gender: values.gender,
+        email: values.email,
+        idNumber: values.idNumber,
+        password: values.password,
+        role: values.role,
+        courseId: parseInt(values.course)
+      };
+      
+      // Make the API call
+      const response = await fetch('http://localhost:8800/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
       }
-    }, 1500);
+      
+      toast.success("Registration successful!", {
+        description: "Your account has been created. Please log in.",
+      });
+      
+      navigate("/login");
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error("Registration failed", {
+        description: error instanceof Error ? error.message : "There was an error creating your account. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
