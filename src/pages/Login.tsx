@@ -1,19 +1,20 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { BookOpen, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+
 import Navbar from '../components/layout/Navbar';
 import GlassCard from '../components/ui-custom/GlassCard';
-import { Input } from '@/components/ui/input';
 import Button from '../components/ui-custom/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
-// Define the form schema with Zod
+// Define form schema using zod
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(1, { message: "Password is required" }),
@@ -22,10 +23,10 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { login } = useAuth();
+  
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -37,28 +38,20 @@ const Login = () => {
   const onSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      try {
-        // Here you would normally make an API call to your backend
-        console.log("Login attempted:", values);
-        
-        // Show success message
-        toast.success("Login successful!", {
-          description: "Welcome to EduExam platform.",
-        });
-        
-        // Redirect to home page
-        navigate("/");
-      } catch (error) {
-        // Show error message
-        toast.error("Login failed", {
-          description: "Invalid email or password. Please try again.",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    }, 1500);
+    try {
+      await login(values.email, values.password);
+      
+      toast.success("Login successful!", {
+        description: "Welcome to EduExam platform.",
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("Login failed", {
+        description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -75,14 +68,13 @@ const Login = () => {
           className="max-w-md mx-auto"
         >
           <GlassCard className="p-8">
-            <div className="flex flex-col items-center justify-center mb-8">
-              <BookOpen className="h-12 w-12 text-eduAccent mb-4" />
-              <h1 className="text-3xl font-bold">Welcome Back</h1>
-              <p className="text-eduText-light mt-2">Sign in to your account</p>
+            <div className="flex items-center justify-center mb-6">
+              <BookOpen className="h-10 w-10 text-eduAccent" />
+              <h1 className="text-3xl font-bold ml-2">Log In</h1>
             </div>
             
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="email"
@@ -90,7 +82,14 @@ const Login = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="Enter your email" {...field} />
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-eduText-light" />
+                          <Input 
+                            placeholder="Your email address" 
+                            className="pl-10" 
+                            {...field} 
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -102,25 +101,26 @@ const Login = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex justify-between items-center">
-                        <FormLabel>Password</FormLabel>
-                        <Button variant="link" to="/forgot-password" className="text-xs">
-                          Forgot password?
-                        </Button>
-                      </div>
+                      <FormLabel>Password</FormLabel>
                       <FormControl>
                         <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-eduText-light" />
                           <Input 
                             type={showPassword ? "text" : "password"} 
-                            placeholder="Enter your password" 
+                            placeholder="Your password" 
+                            className="pl-10" 
                             {...field} 
                           />
-                          <button
+                          <button 
                             type="button"
+                            className="absolute right-3 top-3 text-eduText-light hover:text-eduText"
                             onClick={togglePasswordVisibility}
-                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-eduText-light hover:text-eduAccent"
                           >
-                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>
@@ -129,22 +129,28 @@ const Login = () => {
                   )}
                 />
                 
-                <div className="pt-4 space-y-4">
+                <div className="text-right">
+                  <Button variant="link" to="/forgot-password" size="sm">
+                    Forgot password?
+                  </Button>
+                </div>
+                
+                <div className="pt-2">
                   <Button 
                     type="submit" 
                     variant="primary" 
                     loading={isSubmitting}
                     className="w-full"
                   >
-                    Sign In
+                    Log In
                   </Button>
-                  
-                  <div className="text-center">
-                    <span className="text-eduText-light">Don't have an account? </span>
-                    <Button variant="link" to="/register">
-                      Register
-                    </Button>
-                  </div>
+                </div>
+                
+                <div className="text-center pt-4">
+                  <span className="text-eduText-light">Don't have an account? </span>
+                  <Button variant="link" to="/register">
+                    Register
+                  </Button>
                 </div>
               </form>
             </Form>
