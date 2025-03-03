@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
@@ -18,43 +17,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 // Define South African ID validation pattern
 const validateSouthAfricanID = (id: string) => {
-  // Length Validation (Must be 13 digits)
   if (id.length !== 13) {
     return false;
   }
   
-  // Numeric Validation (Only digits allowed)
   if (!/^\d+$/.test(id)) {
     return false;
   }
   
-  // Extract birth date components
   const year = parseInt(id.substring(0, 2));
   const month = parseInt(id.substring(2, 4));
   const day = parseInt(id.substring(4, 6));
   
-  // Create full year (assuming 1900s if year > current 2-digit year, otherwise 2000s)
   const currentYear = new Date().getFullYear() % 100;
   const fullYear = year > currentYear ? 1900 + year : 2000 + year;
   
-  // Date Validation (Valid birth date in first 6 digits)
   const birthDate = new Date(fullYear, month - 1, day);
   if (
     birthDate.getFullYear() !== fullYear ||
     birthDate.getMonth() !== month - 1 ||
     birthDate.getDate() !== day ||
-    birthDate > new Date() // Future dates are invalid
+    birthDate > new Date()
   ) {
     return false;
   }
   
-  // Gender Validation (7th digit for gender)
   const genderDigit = parseInt(id.charAt(6));
   if (![0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(genderDigit)) {
     return false;
   }
   
-  // Citizenship Validation (11th digit: 0 for SA, 1 for other)
   const citizenshipDigit = parseInt(id.charAt(10));
   if (![0, 1].includes(citizenshipDigit)) {
     return false;
@@ -62,6 +54,18 @@ const validateSouthAfricanID = (id: string) => {
   
   return true;
 };
+
+// Define the course type
+interface Course {
+  id: number;
+  name: string;
+}
+
+// Define the response type
+interface CourseResponse {
+  courses: Course[];
+  message: string;
+}
 
 // Available courses/programs
 const availableCourses = [
@@ -108,6 +112,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -125,24 +131,42 @@ const Register = () => {
     mode: "onChange", // This enables validation to run on change, helping clear errors as user types
   });
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setIsLoadingCourses(true);
+      try {
+        const response = await fetch('http://localhost:8800/api/course/courses');
+        if (!response.ok) {
+          throw new Error('Failed to fetch courses');
+        }
+        const data: CourseResponse = await response.json();
+        setCourses(data.courses);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        toast.error('Failed to load courses', {
+          description: 'Please try again later or contact support.',
+        });
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
   const onSubmit = async (values: RegisterFormValues) => {
     setIsSubmitting(true);
     
-    // Simulate API call delay
     setTimeout(() => {
       try {
-        // Here you would normally make an API call to your backend
         console.log("Form submitted:", values);
         
-        // Show success message
         toast.success("Registration successful!", {
           description: "Your account has been created. Please log in.",
         });
         
-        // Redirect to login page
         navigate("/login");
       } catch (error) {
-        // Show error message
         toast.error("Registration failed", {
           description: "There was an error creating your account. Please try again.",
         });
@@ -361,18 +385,25 @@ const Register = () => {
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
+                        disabled={isLoadingCourses}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select your course/program" />
+                            <SelectValue placeholder={isLoadingCourses ? "Loading courses..." : "Select your course/program"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {availableCourses.map(course => (
-                            <SelectItem key={course.id} value={course.id}>
-                              {course.name}
+                          {courses.length > 0 ? (
+                            courses.map(course => (
+                              <SelectItem key={course.id} value={course.id.toString()}>
+                                {course.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>
+                              {isLoadingCourses ? "Loading courses..." : "No courses available"}
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
