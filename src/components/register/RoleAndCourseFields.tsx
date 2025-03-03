@@ -67,7 +67,7 @@ const RoleAndCourseFields: React.FC<RoleAndCourseFieldsProps> = ({
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="" disabled>
+                  <SelectItem value="no-courses" disabled>
                     {isLoadingCourses ? "Loading courses..." : "No courses available"}
                   </SelectItem>
                 )}
