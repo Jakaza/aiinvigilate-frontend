@@ -67,11 +67,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ courses, isLoadingCourses }
         throw new Error(data.message || 'Registration failed');
       }
       
+      // Navigate to verification page with email
+      navigate(`/verify-email?email=${encodeURIComponent(values.email)}`);
+      
       toast.success("Registration successful!", {
-        description: "Your account has been created. Please log in.",
+        description: "Please check your email to verify your account.",
       });
       
-      navigate("/login");
     } catch (error) {
       console.error('Registration error:', error);
       toast.error("Registration failed", {

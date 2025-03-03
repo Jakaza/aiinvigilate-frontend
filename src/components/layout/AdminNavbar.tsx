@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BookOpen, Users, FileText, ChevronDown, Menu, X, LogOut, Home, User } from 'lucide-react';
+import { BookOpen, Users, FileText, ChevronDown, Menu, X, LogOut, Home, User, Book } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,7 @@ type AdminNavbarProps = {
 const AdminNavbar = ({ userRole, userName = 'User', userImage }: AdminNavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { logout } = useAuth();
   
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -72,6 +74,11 @@ const AdminNavbar = ({ userRole, userName = 'User', userImage }: AdminNavbarProp
         to: "/admin",
         icon: <Users className="h-4 w-4" />,
         label: "User Management"
+      },
+      {
+        to: "/admin/modules",
+        icon: <Book className="h-4 w-4" />,
+        label: "Module Management"
       },
       {
         to: "/admin/tests",
@@ -104,6 +111,10 @@ const AdminNavbar = ({ userRole, userName = 'User', userImage }: AdminNavbarProp
       }
     ] : [])
   ];
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
@@ -153,11 +164,11 @@ const AdminNavbar = ({ userRole, userName = 'User', userImage }: AdminNavbarProp
                   <Link to="/settings" className="flex items-center w-full">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link to="/login" className="flex items-center w-full gap-2 text-red-500">
+                <DropdownMenuItem onClick={handleLogout}>
+                  <div className="flex items-center w-full gap-2 text-red-500">
                     <LogOut className="h-4 w-4" />
                     <span>Logout</span>
-                  </Link>
+                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -205,13 +216,13 @@ const AdminNavbar = ({ userRole, userName = 'User', userImage }: AdminNavbarProp
               >
                 Settings
               </Link>
-              <Link
-                to="/login"
-                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium hover:bg-red-100 text-red-500"
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium hover:bg-red-100 text-red-500 w-full text-left"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
-              </Link>
+              </button>
             </div>
           </nav>
         </div>
